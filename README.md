@@ -52,7 +52,13 @@ public/.well-known/
 
 ---
 
-### Step 2: Important Rules
+### Step 2: Set Proper Permissions (Recommended)
+SSH into server and run:
+```
+ssh userName@yourServerIP
+chmod -R 755 public/.well-known
+```
+### Step 3: Important Rules
 
 * ✅ Must be inside `.well-known` folder
 * ✅ Must be accessible via browser
