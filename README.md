@@ -1,4 +1,4 @@
-# Deep Linking Guide (Simple & Clear for Everyone)
+# Deep Linking Guide
 
 [![Youtube][youtube-shield]][youtube-url]
 [![Facebook][facebook-shield]][facebook-url]
@@ -7,12 +7,11 @@
 
 Thanks for visiting my GitHub account!
 
+---
 
-## 🧩 1. What is Deep Linking?
+## 1. What is Deep Linking?
 
-Deep linking means:
-
-👉 A URL can open a **specific screen inside your mobile app**.
+Deep linking allows a URL to open a specific screen inside a mobile application, rather than simply launching the app's home screen or falling back to a browser.
 
 **Example:**
 
@@ -20,29 +19,29 @@ Deep linking means:
 https://yourdomain.com/product/123
 ```
 
-* ✅ If app is installed → opens Product page in app
-* ❌ If not installed → opens in browser
+- If the app is installed — opens the Product screen directly inside the app
+- If not installed — opens the URL in the browser
 
 ---
 
-## ⚙️ 2. How It Works (Easy Flow)
+## 2. How It Works
 
 ```
 User clicks link
-        ↓
-Mobile checks domain (.well-known files)
-        ↓
-If verified → Open App
-Else → Open Browser
-        ↓
-App reads URL → Opens correct screen
+        |
+Mobile OS checks domain verification files (.well-known)
+        |
+If verified --> Open App
+Else        --> Open Browser
+        |
+App reads the URL and navigates to the correct screen
 ```
 
 ---
 
-## 👨‍💻 3. Backend Developer (Your Job)
+## 3. Backend Developer Responsibilities
 
-### Step 1: Create Folder
+### Step 1: Create the Folder Structure
 
 ```
 public/.well-known/
@@ -52,19 +51,26 @@ public/.well-known/
 
 ---
 
-### Step 2: Set Proper Permissions (Recommended)
-SSH into server and run:
-```
+### Step 2: Set Proper Permissions
+
+SSH into the server and run:
+
+```bash
 ssh userName@yourServerIP
 chmod -R 755 public/.well-known
 ```
-### Step 3: Important Rules
 
-* ✅ Must be inside `.well-known` folder
-* ✅ Must be accessible via browser
-* ✅ Must use HTTPS
+---
 
-Test:
+### Step 3: Verify Accessibility
+
+Both files must meet the following requirements:
+
+- Must reside inside the `.well-known` folder
+- Must be accessible via browser (no authentication walls)
+- Must be served over HTTPS
+
+Test the URLs:
 
 ```
 https://yourdomain.com/.well-known/assetlinks.json
@@ -73,11 +79,9 @@ https://yourdomain.com/.well-known/apple-app-site-association
 
 ---
 
-### Step 3: iOS File
+### Step 4: iOS File
 
-⚠️ Important:
-
-* No `.json` extension
+Note the file for iOS has **no `.json` extension**:
 
 ```
 apple-app-site-association
@@ -85,138 +89,103 @@ apple-app-site-association
 
 ---
 
-### Step 4: Android File
+### Step 5: Android File
 
 ```
 assetlinks.json
 ```
 
-👉 Content will be provided by app developer
+The content for this file will be provided by the app developer, as it contains the app's SHA256 certificate fingerprint and package name.
 
 ---
 
-### ✅ Backend Summary
+### Backend Summary
 
-👉 Your job is ONLY:
+The backend developer's responsibility is limited to:
 
-* Create `.well-known` folder
-* Add 2 files
-* Make them accessible
-* Ensure HTTPS
-
-👉 Done ✅
+- Creating the `.well-known` folder
+- Adding the two verification files
+- Ensuring both files are publicly accessible
+- Confirming the domain uses HTTPS
 
 ---
 
-## 📱 4. Flutter / App Developer Job
+## 4. Flutter / App Developer Responsibilities
 
-Flutter dev actually does ONLY 2 things:
+The app developer's job is straightforward and involves two tasks:
 
-### 1. Read the URL
-
-Example:
+### 1. Read the incoming URL
 
 ```
 https://yourdomain.com/product/1
 ```
 
-### 2. Open the screen
+### 2. Navigate to the appropriate screen
 
 ```
-/product/1 → ProductScreen(1)
+/product/1  -->  ProductScreen(id: 1)
+```
+
+**Core logic:**
+
+```dart
+if (url.contains('product')) {
+    openProductPage();
+}
 ```
 
 ---
 
-### 🧠 Simple Logic
-
-```
-if (url contains 'product')
-    open Product Page
-```
-
-👉 That’s it 😄
-
----
-
-## 🧪 5. Testing
+## 5. Testing
 
 ### Android
 
-```
+```bash
 adb shell am start -a android.intent.action.VIEW -d "https://yourdomain.com/product/1"
 ```
 
 ### iOS
 
-* Open link in Safari
-* Or open from Notes app
+- Open the link in Safari
+- Or open it from the Notes app
 
 ---
 
-## ❌ 6. Common Problems
+## 6. Common Issues
 
-* HTTPS not enabled ❌
-* Wrong SHA256 ❌
-* Wrong Bundle ID ❌
-* Files not accessible ❌
-
----
-
-## 📋 7. Production Checklist
-
-* [ ] HTTPS enabled
-* [ ] `.well-known` folder exists
-* [ ] Both files accessible
-* [ ] Android works
-* [ ] iOS works
-* [ ] App opens correct screen
+- HTTPS not enabled on the server
+- Incorrect SHA256 fingerprint in `assetlinks.json`
+- Wrong Bundle ID or App ID
+- Verification files not publicly accessible
 
 ---
 
-## 🎯 8. Final Understanding
+## 7. Production Checklist
 
-👉 Backend = verifies domain
-👉 App = opens screen
-
----
-
-## 😄 9. Simple Truth
-
-Flutter dev may say it’s complex…
-
-But actually:
-
-```
-URL আসে → ID নেয় → Screen open করে
-```
-
-👉 That’s all 🎉
+- [ ] HTTPS enabled on the domain
+- [ ] `.well-known` folder exists and is accessible
+- [ ] Both `assetlinks.json` and `apple-app-site-association` are reachable via browser
+- [ ] Android deep linking tested and working
+- [ ] iOS deep linking tested and working
+- [ ] App navigates to the correct screen upon link click
 
 ---
 
-## 🏁 Conclusion
+## 8. Summary
 
-If both backend and app are correctly configured:
+- **Backend** — Verifies domain ownership using `.well-known` files
+- **App** — Reads the URL and navigates to the correct screen
 
-✅ Deep linking will work perfectly
+When both sides are correctly configured, deep linking works reliably and seamlessly.
+
+---
+
+## A Note on Complexity
+
+Deep linking is often perceived as complicated, but the underlying concept is simple. The backend verifies the domain; the app reads the URL and opens the right screen. Following the steps in this guide, the entire setup can be completed quickly and without any ambiguity.
 
 ---
 
-
-## 📝 Simple Note
-
-Deep linking is actually very simple.
-
-- Backend just verifies the domain using `.well-known` files  
-- App just reads the URL and opens the correct screen  
-
-That’s it.
-
-No need to overcomplicate —  
-finish the work quickly and enjoy your tea ☕😄
-
----
 ## Author
 
 Developed and maintained by [MD. Rahatul Rabbi](https://github.com/learnwithfair).
